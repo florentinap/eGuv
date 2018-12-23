@@ -3,6 +3,7 @@ import threading
 import pika
 import requests
 import urllib
+from urllib.request import Request
 from domain import *
 from general import *
 from time import sleep
@@ -84,8 +85,8 @@ class WorkersSet1(threading.Thread):
                 proxy = urllib.request.ProxyHandler({'http': proxy})
                 opener = urllib.request.build_opener(proxy)
                 urllib.request.install_opener(opener)
-                response = urllib.request.urlopen(page_url)
-
+                req = Request(page_url, headers={'User-Agent': 'Mozilla/5.0'})
+                response = urllib.request.urlopen(req)
                 header = response.getheader('Content-Type')
                 if 'text/html' in header:
                     html = response.read()

@@ -18,7 +18,7 @@ class WorkersSet3(threading.Thread):
                  args = (), kwargs = None, verbose = None):
         super(WorkersSet3, self).__init__()
 
-        self.tableName = 'crawlerDB'
+        self.tableName = 'tema3'
         self.queueRecv = CrawlerQueue(RabbitMQ.HOST.value, RabbitMQ.Q2.value, True)
         self.cache = CrawlerDB(credentials.HOST.value, 
                                 credentials.USER.value, 
@@ -30,8 +30,8 @@ class WorkersSet3(threading.Thread):
                         Keys.MINISTER.value: dataTypes.MINISTER.value,
                         Keys.PAP.value: dataTypes.PAP.value}
                         
-        if self.cache.checkExists(self.tableName) == 0:
-            self.cache.create(createDict)
+        #if self.cache.checkExists(self.tableName) == 0:
+        #    self.cache.create(createDict)
 
     def callback(self, ch, method, properties, body):
         ch.basic_ack(delivery_tag = method.delivery_tag)
@@ -51,17 +51,19 @@ class WorkersSet3(threading.Thread):
 
         URL = list(HTML_content.keys())[0]
         body = list(HTML_content.values())[0]
-
+        soup = BeautifulSoup(body, 'html.parser')
+        
         insertDict = {}
 
         for link in soup.find_all('a'):
             currentLink = link.get('href')
             title = link.get('title')
-            if ((currentLink.endswith('pdf') or currentLink.endswith('xlsx')) and 'paap' in currentLink.lower()) or ('paap' in title.lower()):
+            if ((currentLink.endswith('pdf') or currentLink.endswith('xlsx')) and 'paap' in currentLink.lower()) or (title and 'paap' in title.lower()):
                     insertDict[Keys.URL.value] = currentLink
                     insertDict[Keys.PAP.value] = link.contents[0]
                     insertDict[Keys.TABLE.value] = self.tableName
                     insertDict[Keys.MINISTER.value] = get_subdomain_name(URL)
+                    print('====================================================================')
                     print(insertDict)
 
 
