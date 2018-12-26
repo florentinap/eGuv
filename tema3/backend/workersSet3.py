@@ -5,6 +5,7 @@ import json
 from bs4 import BeautifulSoup
 from crawlerDB import CrawlerDB 
 from crawlerQueue import CrawlerQueue
+from urllib import parse
 from domain import *
 from configDB import *
 from configRabbitMQ import *
@@ -15,9 +16,13 @@ from configRabbitMQ import *
 class WorkersSet3(threading.Thread):
 
     def __init__(self, group = None, target = None, name = None,
-                 args = (), kwargs = None, verbose = None):
+                 args = (), kwargs = None, verbose = None,
+                 project_name = None, base_url = None, domain_name = None):
         super(WorkersSet3, self).__init__()
 
+        self.project_name = project_name
+        self.base_url = base_url
+        self.domain_name = domain_name
         self.tableName = 'tema3'
         self.queueRecv = CrawlerQueue(RabbitMQ.HOST.value, RabbitMQ.Q2.value, True)
         self.cache = CrawlerDB(credentials.HOST.value, 
@@ -58,13 +63,11 @@ class WorkersSet3(threading.Thread):
         for link in soup.find_all('a'):
             currentLink = link.get('href')
             title = link.get('title')
-            if ((currentLink.endswith('pdf') or currentLink.endswith('xlsx')) and 'paap' in currentLink.lower()) or (title and 'paap' in title.lower()):
-                    insertDict[Keys.URL.value] = currentLink
-                    insertDict[Keys.PAP.value] = link.contents[0]
-                    insertDict[Keys.TABLE.value] = self.tableName
-                    insertDict[Keys.MINISTER.value] = get_subdomain_name(URL)
-                    print('====================================================================')
-                    print(insertDict)
+            if (currentLink and (currentLink.endswith('pdf') or currentLink.endswith('xlsx')) and 'paap' in currentLink.lower()) or (title and 'paap' in title.lower()):
+                insertDict[Keys.URL.value] = parse.urljoin(self.base_url, currentLink)
+                insertDict[Keys.PAP.value] = link.contents[0].encode('ascii', 'ignore').decode('ascii')
+                insertDict[Keys.TABLE.value] = self.tableName
+                insertDict[Keys.MINISTER.value] = get_subdomain_name(URL)
+                print(insertDict)
 
-
-        #self.cache.insert(insertDict)
+                self.cache.insert(insertDict)

@@ -50,13 +50,8 @@ class WorkersSet2(threading.Thread):
             page_url = page_url.decode('ascii')
 
             sleep(1)
-            proxy = next(self.proxy_pool)
-            proxy = urllib.request.ProxyHandler({'http': proxy})
-            opener = urllib.request.build_opener(proxy)
-            urllib.request.install_opener(opener)
             req = Request(page_url, headers={'User-Agent': 'Mozilla/5.0'})
             response = urllib.request.urlopen(req)
-
             header = response.getheader('Content-Type')
             if 'text/html' in header:
                 html = response.read()
@@ -69,11 +64,11 @@ class WorkersSet2(threading.Thread):
                 self.queueSend.set(json.dumps(sendDict))
         # [Errno 104] Connection reset by peer python
         except SocketError as e:
-            print('[WorkerSet2] Connection reset')
+            print('[WorkerSet2] Connection reset' + page_url)
             return set()
         # [Errno 111] Connection refused
         except URLError:
-            print('[WorkerSet2] Cannot connect')
+            print('[WorkerSet2] Cannot connect' + page_url)
             return set()
         # HTTP Error 404: Not Found 
         except HTTPError:

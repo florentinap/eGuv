@@ -6,7 +6,7 @@ from workers import Workers
 
 def main(argv):
     NUMBER_OF_THREADS = 16
-    HOMEPAGES = [gouvenmentSites['mcin'][1]]
+    HOMEPAGES = [val[1] for val in gouvenmentSites.values()][3:]
 
     for HOMEPAGE in HOMEPAGES:
     	PROJECT_NAME = get_domain(HOMEPAGE)

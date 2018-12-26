@@ -79,15 +79,13 @@ class WorkersSet1(threading.Thread):
         try:
             page_url = page_url.replace(' ', '%20')
             page_url = page_url.encode('ascii', 'ignore').decode('ascii')
+
             try:
                 sleep(1)
-                proxy = next(self.proxy_pool)
-                proxy = urllib.request.ProxyHandler({'http': proxy})
-                opener = urllib.request.build_opener(proxy)
-                urllib.request.install_opener(opener)
                 req = Request(page_url, headers={'User-Agent': 'Mozilla/5.0'})
                 response = urllib.request.urlopen(req)
                 header = response.getheader('Content-Type')
+
                 if 'text/html' in header:
                     html = response.read()
                     try:

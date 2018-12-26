@@ -33,6 +33,6 @@ def get_domain(url):
 
     try:
         result = get_subdomain_name(url).split('.')
-        return result[-2]
+        return result[-2] if result[-2] != 'gov' else result[-3]
     except:
         return 'Cannot get domain from %s. Make sure URL is correct.' % (url)

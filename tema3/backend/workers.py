@@ -25,7 +25,7 @@ class Workers:
             worker.start()
 
         for _ in range(self.number_of_workers_set3):
-            worker = WorkersSet3()
+            worker = WorkersSet3(project_name = project_name, base_url = homepage, domain_name = domain_name)
             worker.daemon = True
             worker.start()
         
